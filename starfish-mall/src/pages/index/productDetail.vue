@@ -102,7 +102,7 @@
                 specData.value = res.data.specData;
                 selectItemIdx.value = specData.value[0].goods_spec_id;
             }
-        })
+        }, false)
     }
     
     productDetail();
@@ -110,6 +110,13 @@
     const productPopup = ref();
     const clickType = ref() // 1: 点击购物车 2: 点击兑换
     const addShoppingCart = () => {
+        const token = uni.getStorageSync('token');
+        if (!token) {
+            uni.navigateTo({
+                url: '/pages/login/login'
+            });
+            return;
+        }
         clickType.value = 1;
         productPopup.value.open();        
     }
@@ -131,6 +138,13 @@
         });
     }
     const exchange = () => {
+        const token = uni.getStorageSync('token');
+        if (!token) {
+            uni.navigateTo({
+                url: '/pages/login/login'
+            });
+            return;
+        }
         clickType.value = 2;
         productPopup.value.open();
     }

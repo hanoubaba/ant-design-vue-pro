@@ -5,7 +5,15 @@
             <view class="big-title">
                 <text class="text">个人中心</text>
             </view>
-            <view class="info">
+            <view class="info" v-if="!isLogin" @tap="toLogin">
+                <view class="head">
+                    <image class="head-image" src="/static/my/default-avatar.png" mode="aspectFit"></image>
+                </view>
+                <view class="desc">
+                    <view class="name color-fff">点击登录</view>
+                </view>
+            </view>
+            <view class="info" v-else>
                 <view class="head">
                     <image class="head-image" :src="userInfo.avatar" mode="aspectFit"></image>
                 </view>
@@ -23,7 +31,7 @@
                 </view>
                 <image class="card-bg" src="/static/common/starfish-logo.png" mode="aspectFit"></image>
                 <view class="content">
-                    <text class="value color-red">{{userInfo.score}}</text>
+                    <text class="value color-red">{{isLogin ? userInfo.score : '0'}}</text>
                     <text class="name">罗特币数量</text>
                 </view>
             </view>
@@ -31,31 +39,31 @@
         <view class="order">
             <view class="order-header">
                 <text class="title">我的订单</text>
-                <view class="order-all" @tap="toOrderList('0')">
+                <view class="order-all" @tap="checkLoginAndGo('0')">
                     <text class="show color-999">查看全部</text>
                     <image class="arrow" src="/static/my/arrow-right.png" mode="aspectFit"></image>
                 </view>
             </view>
             <view class="status-list">
-                <view class="item" @tap="toOrderList('0')">
+                <view class="item" @tap="checkLoginAndGo('0')">
                     <image class="icon" src="/static/my/order-all.png" mode="aspectFit"></image>
                     <text class="name color-333">全部订单</text>
                 </view>
-                <view class="item" @tap="toOrderList('10')">
+                <view class="item" @tap="checkLoginAndGo('10')">
                     <image class="icon" src="/static/my/order-place.png" mode="aspectFit"></image>
                     <text class="name color-333">已下单</text>
                 </view>
-                <view class="item" @tap="toOrderList('20')">
+                <view class="item" @tap="checkLoginAndGo('20')">
                     <image class="icon" src="/static/my/order-deliver.png" mode="aspectFit"></image>
                     <text class="name color-333">已发货</text>
                 </view>
-                <view class="item" @tap="toOrderList('30')">
+                <view class="item" @tap="checkLoginAndGo('30')">
                     <image class="icon" src="/static/my/order-complete.png" mode="aspectFit"></image>
                     <text class="name color-333">已完成</text>
                 </view>
             </view>
         </view>
-        <view class="button-box">
+        <view class="button-box" v-if="isLogin">
             <Btn name="退出登录" type="big" @tap="exit"></Btn>
         </view>
     </view>
@@ -75,22 +83,38 @@
     }
     const confirm = () => {
         uni.removeStorageSync('token');
-        uni.redirectTo({
-            url: '/pages/login/login'
-        })
+        init();
     }
     const toOrderList = (status) => {
         uni.navigateTo({
             url: `/pages/order/orderList?status=${status}`
         })
     }
+    const toLogin = () => {
+        uni.navigateTo({
+            url: '/pages/login/login'
+        })
+    }
+    const checkLoginAndGo = (status) => {
+        if (!isLogin.value) {
+            toLogin();
+            return;
+        }
+        toOrderList(status);
+    }
+    const isLogin = ref(false);
     const userInfo = ref({});
     const init = () => {
-        api.userInfo({
-            success(res) {
-                userInfo.value = res.data.user_data;
-            }
-        })
+        const token = uni.getStorageSync('token');
+        isLogin.value = !!token;
+        
+        if (isLogin.value) {
+            api.userInfo({
+                success(res) {
+                    userInfo.value = res.data.user_data;
+                }
+            })
+        }
     }
     onShow(init);
 </script>
@@ -143,13 +167,15 @@
                     font-size: 18px;
                 }
                 .mobile {
-                    font-size: 10px;
-                    height: 18px;
+                    font-size: 12px;
+                    height: 20px;
+                    line-height: 20px;
                     display: flex;
                     align-items: center;
-                    padding-left: 22px;
+                    padding: 0 10px 0 22px;
                     background: url(/static/my/mobile-bar.png) no-repeat;
-                    background-size: contain;
+                    background-size: 100% 100%;
+                    white-space: nowrap;
                 }
             }
         }
