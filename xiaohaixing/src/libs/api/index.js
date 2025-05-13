@@ -2,7 +2,7 @@ import {createPostApi} from '@/libs/utils/http'
 export default createPostApi([
     'user/mobilelogin',
     'user/wechatMobileLogin',
-    'user/info',
+    {userInfo: 'user/info'},
     'user/score',
     'user/score_log',
     'user/give_log',
